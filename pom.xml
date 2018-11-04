@@ -6,7 +6,7 @@
 	<packaging>maven-plugin</packaging>
 	<name>API Portal Maven Plugin</name>
 
-	<url>http://api-portal.de</url>
+	<url>http://www.api-portal.de</url>
 
 	<properties>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
