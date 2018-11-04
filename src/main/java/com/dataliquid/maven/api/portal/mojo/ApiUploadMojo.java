@@ -2,22 +2,6 @@ package com.dataliquid.maven.api.portal.mojo;
 
 import java.io.File;
 
-/*
- * Copyright 2001-2005 The Apache Software Foundation.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-
 import org.apache.maven.plugin.AbstractMojo;
 import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.plugins.annotations.LifecyclePhase;
@@ -34,8 +18,8 @@ import com.github.kevinsawicki.http.HttpRequest;
 @Mojo(name = "api-upload", defaultPhase = LifecyclePhase.DEPLOY)
 public class ApiUploadMojo extends AbstractMojo
 {
-    @Parameter(defaultValue = "${project.build.directory}", property = "outputDir", required = true)
-    private File outputDirectory;
+    @Parameter(defaultValue = "${project.basedir}", property = "directory", required = true)
+    private File directory;
 
     @Parameter(defaultValue = "${project}", required = true)
     private MavenProject project;
@@ -52,70 +36,77 @@ public class ApiUploadMojo extends AbstractMojo
     @Parameter(property = "endpoint", required = true)
     private String endpoint;
 
-    @Parameter(property = "api-id", defaultValue = "${project.version}")
+    private String basePath = "/api-portal-services/app/api/web/management/interfaces";
+
+    @Parameter(property = "api-id", required = true)
     private String apiId;
 
-    @Parameter(property = "api-version", defaultValue = "${project.version}")
+    @Parameter(property = "api-version", required = true)
     private String apiVersion;
 
-    @Parameter(property = "fileName", defaultValue = "${project.artifactId}-${project.version}.${project.packaging}")
+    @Parameter(property = "fileName", required = true)
     private String fileName;
 
     public void execute() throws MojoExecutionException
     {
-        if (AuthenticationType.BASIC.equals(auth) && (username == null || username.isEmpty()) || (password == null || password.isEmpty()))
+        try
         {
-            throw new MojoExecutionException(
-                    "The API Portal Maven Plugin configuration is incomplete: username and password are required for basic authentication type.");
-        }
 
-        getLog().info("Checking the accessibility of the endpoint [ " + endpoint + " ] ...");
-        HttpRequest request = HttpRequest.get(endpoint);
-        if (!request.ok())
-        {
-            getLog().warn("Endpoint is not reachable!");
-            throw new MojoExecutionException("The Endpoint " + endpoint + " is not reachable.");
-        }
-
-        getLog().info("The endpoint is reachable.");
-
-        if (username != null && !username.isEmpty() && password != null)
-        {
-            getLog().info("Using configured username and password for endpoint.");
-            if (!request.basic(username, password).ok())
+            if (AuthenticationType.BASIC.equals(auth) && (username == null || username.isEmpty())
+                    || (password == null || password.isEmpty()))
             {
-                getLog().info("Failed to login to endpoint!");
+                throw new MojoExecutionException(
+                        "The API Portal Maven Plugin configuration is incomplete: username and password are required for basic authentication type.");
+            }
+
+            String apiPath = endpoint + basePath + "/" + apiId + "/update";
+            HttpRequest request = HttpRequest.put(apiPath);
+
+            if (AuthenticationType.BASIC.equals(auth))
+            {
+                getLog().info("Authentication Mode BASIC - using configured username and password for endpoint.");
+                request.basic(username, password);
+            }
+
+            File apiFile = new File(directory, fileName);
+
+            if (!getLog().isDebugEnabled())
+            {
+                getLog().info("Upload API file [" + apiFile.getPath() + "]");
             }
             else
             {
-                getLog().info("Logged in successfully.");
+                getLog().debug("Upload API file [" + apiFile.getPath() + "] to [" + apiPath + "]");
+            }
+
+            request.part("api_version", apiVersion);
+            request.part("file", "file", apiFile);
+
+            int code = request.code();
+            if (request.noContent())
+            {
+                getLog().info("API uploaded successfully.");
+            }
+            else
+            {
+                getLog().info("API upload failed. HTTP Response: " + code + " - " + request.message());
             }
         }
-
-        File toPublish = new File(outputDirectory, fileName);
-        getLog().info("Upload API file [" + toPublish.getPath() + "]");
-
-        request = HttpRequest.post(endpoint);
-        request.part("file", toPublish);
-        if (request.ok())
+        catch (Exception e)
         {
-            getLog().info("API uploaded successfully.");
-        }
-        else
-        {
-            getLog().info("Failed to upload API.");
+            getLog().error("Error uploading API. Reason: ", e);
         }
 
     }
 
-    public File getOutputDirectory()
+    public File getDirectory()
     {
-        return outputDirectory;
+        return directory;
     }
 
-    public void setOutputDirectory(File outputDirectory)
+    public void setDirectory(File directory)
     {
-        this.outputDirectory = outputDirectory;
+        this.directory = directory;
     }
 
     public AuthenticationType getAuth()
