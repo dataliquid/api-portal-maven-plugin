@@ -135,7 +135,7 @@ public class ApiUpdateMojo extends AbstractMojo
             }
             else
             {
-                getLog().info("API " + filename + " upload failed. HTTP Response: " + code + " - " + request.message());
+                getLog().warn("API " + filename + " upload failed. HTTP Response: " + code + " - " + request.message());
             }
         }
         catch (Exception e)
