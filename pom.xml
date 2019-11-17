@@ -23,7 +23,7 @@
 	<packaging>maven-plugin</packaging>
 	<name>dataliquid :: API Portal Maven Plugin</name>
 
-	<url>https://www.api-portal.de</url>
+	<url>https://www.api-portal.io</url>
 
 	<organization>
 		<name>dataliquid GmbH</name>

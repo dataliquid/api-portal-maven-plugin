@@ -64,7 +64,7 @@ public class ApiUpdateMojo extends AbstractMojo
     @Parameter(property = "password")
     private String password;
 
-    @Parameter(property = "endpoint", defaultValue = "https://www.api-portal.de", required = true)
+    @Parameter(property = "endpoint", defaultValue = "https://www.api-portal.io", required = true)
     private String endpoint;
 
     @Parameter(property = "basePath", defaultValue = "/services/app/api/v1/interfaces", required = true)
