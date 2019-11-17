@@ -131,14 +131,7 @@ public class ApiUpdateMojo extends AbstractMojo
 
             File apiFile = new File(directory, filename);
 
-            if (!getLog().isDebugEnabled())
-            {
-                getLog().info("Upload API file [" + apiFile.getPath() + "]");
-            }
-            else
-            {
-                getLog().debug("Upload API file [" + apiFile.getPath() + "] to [" + apiPath + "]");
-            }
+            getLog().info("Upload API file [" + apiFile.getPath() + "] to [" + apiPath + "]");
 
             request.part("api_version", apiVersion);
             request.part("file", "file", apiFile);
