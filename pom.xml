@@ -19,7 +19,7 @@
 	<modelVersion>4.0.0</modelVersion>
 	<groupId>com.dataliquid.maven</groupId>
 	<artifactId>api-portal-maven-plugin</artifactId>
-	<version>1.0.1-SNAPSHOT</version>
+	<version>1.0.2-SNAPSHOT</version>
 	<packaging>maven-plugin</packaging>
 	<name>dataliquid :: API Portal Maven Plugin</name>
 
@@ -139,7 +139,7 @@
 				<version>2.4</version>
 				<executions>
 					<execution>
-						<id></id>
+						<id />
 						<phase>prepare-package</phase>
 						<goals>
 							<goal>jar</goal>
