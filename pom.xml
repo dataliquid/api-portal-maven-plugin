@@ -1,12 +1,58 @@
+<!--
+
+    Copyright © 2019 dataliquid GmbH | www.dataliquid.com
+
+    Licensed under the Apache License, Version 2.0 (the "License");
+    you may not use this file except in compliance with the License.
+    You may obtain a copy of the License at
+
+    http://www.apache.org/licenses/LICENSE-2.0
+
+    Unless required by applicable law or agreed to in writing, software
+    distributed under the License is distributed on an "AS IS" BASIS,
+    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+    See the License for the specific language governing permissions and
+    limitations under the License.
+
+-->
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
 	<modelVersion>4.0.0</modelVersion>
+	<parent>
+		<groupId>com.dataliquid</groupId>
+		<artifactId>parent-oss</artifactId>
+		<version>1.1.0</version>
+	</parent>
 	<groupId>com.dataliquid.maven</groupId>
 	<artifactId>api-portal-maven-plugin</artifactId>
-	<version>1.0.0</version>
+	<version>1.0.1</version>
 	<packaging>maven-plugin</packaging>
-	<name>API Portal Maven Plugin</name>
+	<name>dataliquid :: API Portal Maven Plugin</name>
+	<description>Maven Plugin to use the API Portal functionality.</description>
 
-	<url>http://www.api-portal.de</url>
+	<url>https://www.api-portal.io</url>
+
+	<organization>
+		<name>dataliquid GmbH</name>
+		<url>www.dataliquid.com</url>
+	</organization>
+
+	<inceptionYear>2019</inceptionYear>
+	
+	<licenses>
+		<license>
+			<name>Apache License, Version 2.0</name>
+		</license>
+	</licenses>
+	<scm>
+		<url>https://github.com/dataliquid/distribution-verifier-maven-plugin/tree/master</url>
+	</scm>
+	<developers>
+		<developer>
+			<name>GitHub Developer Team</name>
+			<organization>dataliquid GmbH</organization>
+			<organizationUrl>www.dataliquid.com</organizationUrl>
+		</developer>
+	</developers>
 
 	<properties>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
@@ -24,6 +70,16 @@
 			<scope>provided</scope>
 		</dependency>
 		<dependency>
+			<groupId>org.apache.maven</groupId>
+			<artifactId>maven-settings</artifactId>
+			<version>3.0.4</version>
+		</dependency>
+		<dependency>
+			<groupId>org.apache.maven</groupId>
+			<artifactId>maven-core</artifactId>
+			<version>3.3.9</version>
+		</dependency>
+		<dependency>
 			<groupId>org.codehaus.plexus</groupId>
 			<artifactId>plexus-utils</artifactId>
 			<version>3.0.8</version>
@@ -39,21 +95,33 @@
 			<version>6.0</version>
 		</dependency>
 		<dependency>
+			<groupId>commons-lang</groupId>
+			<artifactId>commons-lang</artifactId>
+			<version>2.6</version>
+		</dependency>
+		<dependency>
 			<groupId>junit</groupId>
 			<artifactId>junit</artifactId>
-			<version>4.8.2</version>
+			<version>4.11</version>
 			<scope>test</scope>
 		</dependency>
 	</dependencies>
-
 	<build>
 		<plugins>
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-compiler-plugin</artifactId>
+				<configuration>
+					<source>1.8</source>
+					<target>1.8</target>
+				</configuration>
+			</plugin>
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-plugin-plugin</artifactId>
 				<version>3.2</version>
 				<configuration>
-					<goalPrefix>publish-maven-plugin</goalPrefix>
+					<goalPrefix>api-portal</goalPrefix>
 					<skipErrorNoDescriptorsFound>true</skipErrorNoDescriptorsFound>
 				</configuration>
 				<executions>
@@ -71,44 +139,98 @@
 					</execution>
 				</executions>
 			</plugin>
+			<plugin>
+				<groupId>com.mycila</groupId>
+				<artifactId>license-maven-plugin</artifactId>
+				<configuration>
+					<header>https://raw.githubusercontent.com/dataliquid/parent-oss/1.0.0/src/main/resources/licence/APACHE-2.tmpl.txt</header>
+					<properties>
+						<owner>dataliquid GmbH</owner>
+						<website>www.dataliquid.com</website>
+					</properties>
+					<excludes>
+						<exclude>LICENSE</exclude>
+					</excludes>
+				</configuration>
+				<executions>
+					<execution>
+						<id>license-check</id>
+						<phase>verify</phase>
+						<goals>
+							<goal>check</goal>
+						</goals>
+					</execution>
+				</executions>
+			</plugin>
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-source-plugin</artifactId>
+				<version>2.4</version>
+				<executions>
+					<execution>
+						<id />
+						<phase>prepare-package</phase>
+						<goals>
+							<goal>jar</goal>
+						</goals>
+					</execution>
+				</executions>
+			</plugin>
+			<plugin>
+				<groupId>uk.co.deliverymind</groupId>
+				<artifactId>wiremock-maven-plugin</artifactId>
+				<version>2.3.0</version>
+				<executions>
+					<execution>
+						<phase>integration-test</phase>
+						<goals>
+							<goal>run</goal>
+						</goals>
+						<configuration>
+							<dir>target/test-classes/wiremock</dir>
+							<params>--port=53834 --no-request-journal</params>
+						</configuration>
+					</execution>
+				</executions>
+			</plugin>
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-invoker-plugin</artifactId>
+				<!-- <version>3.2.0</version> different support for -Dsettings.security -->
+				<version>1.8</version>
+				<configuration>
+					<debug>true</debug>
+					<cloneProjectsTo>${project.build.directory}/it</cloneProjectsTo>
+					<pomIncludes>
+						<pomInclude>*/pom.xml</pomInclude>
+					</pomIncludes>
+					<testProperties>
+						<property>
+							<name>settings.security</name>
+							<value>${project.basedir}/src/it/settings-security.xml</value>
+						</property>
+					</testProperties>
+					<showErrors>true</showErrors>
+					<ignoreFailures>false</ignoreFailures>
+					<postBuildHookScript>verify</postBuildHookScript>
+					<localRepositoryPath>${project.build.directory}/local-repo</localRepositoryPath>
+					<settingsFile>src/it/settings.xml</settingsFile>
+					<goals>
+						<goal>clean</goal>
+						<goal>deploy</goal>
+					</goals>
+				</configuration>
+				<executions>
+					<execution>
+						<id>integration-test</id>
+						<goals>
+							<goal>install</goal>
+							<goal>run</goal>
+							<goal>verify</goal>
+						</goals>
+					</execution>
+				</executions>
+			</plugin>
 		</plugins>
 	</build>
-	<profiles>
-		<profile>
-			<id>run-its</id>
-			<build>
-				<plugins>
-					<plugin>
-						<groupId>org.apache.maven.plugins</groupId>
-						<artifactId>maven-invoker-plugin</artifactId>
-						<version>1.7</version>
-						<configuration>
-							<debug>true</debug>
-							<cloneProjectsTo>${project.build.directory}/it</cloneProjectsTo>
-							<pomIncludes>
-								<pomInclude>*/pom.xml</pomInclude>
-							</pomIncludes>
-							<postBuildHookScript>verify</postBuildHookScript>
-							<localRepositoryPath>${project.build.directory}/local-repo</localRepositoryPath>
-							<settingsFile>src/it/settings.xml</settingsFile>
-							<goals>
-								<goal>clean</goal>
-								<goal>test-compile</goal>
-							</goals>
-						</configuration>
-						<executions>
-							<execution>
-								<id>integration-test</id>
-								<goals>
-									<goal>install</goal>
-									<goal>integration-test</goal>
-									<goal>verify</goal>
-								</goals>
-							</execution>
-						</executions>
-					</plugin>
-				</plugins>
-			</build>
-		</profile>
-	</profiles>
 </project>

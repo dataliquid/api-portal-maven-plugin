@@ -1,0 +1,25 @@
+{
+  "id" : "12c3e265-da29-4f0c-9b88-81cf6a0c7688",
+  "name" : "api-portal-update-api",
+  "request" : {
+    "url" : "/api-portal-services/app/api/web/management/interfaces/1/update",
+    "method" : "PUT",
+    "basicAuth" : {
+       "username" : "username",
+       "password" : "password"
+    }
+  },
+  "response" : {
+    "status" : 204,
+    "headers" : {
+      "Date" : "Thu, 17 May 2019 15:02:05 GMT",
+      "Access-Control-Allow-Origin" : "*",
+      "Access-Control-Allow-Headers" : "Origin, X-Requested-With, Content-Type, Accept, X-Token",
+      "Content-Type" : "application/json; charset=utf-8",
+      "Connection" : "Keep-Alive"
+    }
+  },
+  "uuid" : "12c3e265-da29-4f0c-9b88-81cf6a0c7688",
+  "persistent" : true,
+  "insertionIndex" : 5
+}
