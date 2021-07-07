@@ -70,10 +70,10 @@ public class ApiUpdateMojo extends AbstractMojo
     @Parameter(property = "endpoint", defaultValue = "https://www.api-portal.io", required = true)
     private String endpoint;
 
-    @Parameter(property = "basePath", defaultValue = "/portal/v1", required = true)
+    @Parameter(property = "basePath", defaultValue = "", required = true)
     private String basePath;
 
-    @Parameter(property = "path", defaultValue = "/apis/{apiId}/versions", required = true)
+    @Parameter(property = "path", defaultValue = "/portal/v1/apis/{apiId}/versions", required = true)
     private String path;
 
     @Parameter(property = "apiId", required = true)
