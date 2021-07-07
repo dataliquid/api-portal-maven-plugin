@@ -2,7 +2,7 @@
   "id" : "12c3e265-da29-4f0c-9b88-81cf6a0c7699",
   "name" : "api-portal-update-api-invalid",
   "request" : {
-    "url" : "/api-portal-services/app/api/web/management/interfaces/2/update",
+    "url" : "/portal/v1/apis/2/versions",
     "method" : "PUT",
     "basicAuth" : {
        "username" : "username",

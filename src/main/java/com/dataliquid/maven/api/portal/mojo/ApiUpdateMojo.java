@@ -89,7 +89,7 @@ public class ApiUpdateMojo extends AbstractMojo
     {
         try
         {
-            String pathTemplate = endpoint + basePath + "/" + path;
+            String pathTemplate = endpoint + basePath + path;
             String apiPath = resolveUriParameter(pathTemplate);
             HttpRequest request = HttpRequest.put(apiPath);
 
