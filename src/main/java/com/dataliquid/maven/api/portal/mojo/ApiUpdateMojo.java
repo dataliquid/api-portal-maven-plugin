@@ -16,8 +16,11 @@
 package com.dataliquid.maven.api.portal.mojo;
 
 import java.io.File;
+import java.util.HashMap;
+import java.util.Map;
 
 import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.text.StrSubstitutor;
 import org.apache.maven.plugin.AbstractMojo;
 import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.plugins.annotations.Component;
@@ -67,8 +70,11 @@ public class ApiUpdateMojo extends AbstractMojo
     @Parameter(property = "endpoint", defaultValue = "https://www.api-portal.io", required = true)
     private String endpoint;
 
-    @Parameter(property = "basePath", defaultValue = "/services/app/api/v1/interfaces", required = true)
-    private String basePath;
+    @Parameter(property = "basePath")
+    private String basePath = "";
+
+    @Parameter(property = "path", defaultValue = "/portal/v1/apis/{apiId}/versions", required = true)
+    private String path;
 
     @Parameter(property = "apiId", required = true)
     private String apiId;
@@ -83,7 +89,8 @@ public class ApiUpdateMojo extends AbstractMojo
     {
         try
         {
-            String apiPath = endpoint + basePath + "/" + apiId + "/update";
+            String pathTemplate = endpoint + basePath + path;
+            String apiPath = resolveUriParameter(pathTemplate);
             HttpRequest request = HttpRequest.put(apiPath);
 
             if (AuthenticationType.BASIC.equals(auth))
@@ -151,6 +158,17 @@ public class ApiUpdateMojo extends AbstractMojo
             getLog().error("Error uploading API " + filename + " . Reason: ", e);
         }
 
+    }
+
+    private String resolveUriParameter(String pathTemplate)
+    {
+        Map<String, Object> parameters = new HashMap<>();
+        parameters.put("apiId", apiId);
+
+        StrSubstitutor sub = new StrSubstitutor(parameters, "{", "}");
+        String path = sub.replace(pathTemplate);
+
+        return path;
     }
 
     public File getDirectory()
