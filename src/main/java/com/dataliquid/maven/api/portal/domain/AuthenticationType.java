@@ -17,5 +17,5 @@ package com.dataliquid.maven.api.portal.domain;
 
 public enum AuthenticationType
 {
-    BASIC
+    BASIC, CLIENT_ID_SECRET
 }

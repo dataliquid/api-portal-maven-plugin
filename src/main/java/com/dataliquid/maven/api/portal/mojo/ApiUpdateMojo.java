@@ -67,6 +67,12 @@ public class ApiUpdateMojo extends AbstractMojo
     @Parameter(property = "password")
     private String password;
 
+    @Parameter(property = "clientId")
+    private String clientId;
+
+    @Parameter(property = "clientSecret")
+    private String clientSecret;
+
     @Parameter(property = "endpoint", defaultValue = "https://www.api-portal.io", required = true)
     private String endpoint;
 
@@ -130,6 +136,20 @@ public class ApiUpdateMojo extends AbstractMojo
                 }
 
                 request.basic(username, password);
+            }
+
+            else if (AuthenticationType.CLIENT_ID_SECRET.equals(auth))
+            {
+                getLog().info("Authentication Mode CLIENT_ID_SECRET - using configured client id and client secret for endpoint.");
+
+                if ((StringUtils.isBlank(clientId) || StringUtils.isBlank(clientSecret)))
+                {
+                    throw new MojoExecutionException(
+                            "The API Portal Maven Plugin configuration is incomplete: client id and client secret are required for authentication.");
+                }
+
+                request.header("client-id", clientId);
+                request.header("client-secret", clientSecret);
             }
             else
             {
