@@ -44,7 +44,7 @@
 						</goals>
 						<configuration>
 							<endpoint>http://localhost:53834</endpoint>
-							<basePath>/api-portal-services/app/api/web/management/interfaces</basePath>
+<!-- 							<basePath>/api-portal-services/app/api/web/management/interfaces</basePath> -->
 							<auth>BASIC</auth>
 							<username>username</username>
 							<password>password</password>
@@ -62,7 +62,7 @@
 						</goals>
 						<configuration>
 							<endpoint>http://localhost:53834</endpoint>
-							<basePath>/api-portal-services/app/api/web/management/interfaces</basePath>
+<!-- 							<basePath>/api-portal-services/app/api/web/management/interfaces</basePath> -->
 							<auth>BASIC</auth>
 							<server>api-portal</server>
 							<directory>${project.basedir}/api</directory>
@@ -79,7 +79,7 @@
 						</goals>
 						<configuration>
 							<endpoint>http://localhost:53834</endpoint>
-							<basePath>/api-portal-services/app/api/web/management/interfaces</basePath>
+<!-- 							<basePath>/api-portal-services/app/api/web/management/interfaces</basePath> -->
 							<auth>BASIC</auth>
 							<username>username</username>
 							<password>password</password>
@@ -97,7 +97,7 @@
 						</goals>
 						<configuration>
 							<endpoint>http://localhost:53834</endpoint>
-							<basePath>/api-portal-services/app/api/web/management/interfaces</basePath>
+<!-- 							<basePath>/api-portal-services/app/api/web/management/interfaces</basePath> -->
 							<auth>BASIC</auth>
 							<username>username</username>
 							<password>password</password>
