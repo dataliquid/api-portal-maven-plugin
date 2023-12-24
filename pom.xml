@@ -24,7 +24,7 @@
 	</parent>
 	<groupId>com.dataliquid.maven</groupId>
 	<artifactId>api-portal-maven-plugin</artifactId>
-	<version>1.0.2</version>
+	<version>1.0.3-SNAPSHOT</version>
 	<packaging>maven-plugin</packaging>
 	<name>dataliquid :: API Portal Maven Plugin</name>
 	<description>Maven Plugin to use the API Portal functionality.</description>
