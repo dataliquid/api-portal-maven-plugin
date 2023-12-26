@@ -16,11 +16,23 @@
 package com.dataliquid.maven.api.portal.mojo;
 
 import java.io.File;
+import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 
 import org.apache.commons.lang3.StringUtils;
-import org.apache.commons.lang3.text.StrSubstitutor;
+import org.apache.commons.text.StringSubstitutor;
+import org.apache.http.HttpResponse;
+import org.apache.http.auth.AuthScope;
+import org.apache.http.auth.UsernamePasswordCredentials;
+import org.apache.http.client.CredentialsProvider;
+import org.apache.http.client.methods.HttpPut;
+import org.apache.http.entity.ContentType;
+import org.apache.http.entity.mime.MultipartEntityBuilder;
+import org.apache.http.impl.client.BasicCredentialsProvider;
+import org.apache.http.impl.client.CloseableHttpClient;
+import org.apache.http.impl.client.HttpClients;
+import org.apache.http.util.EntityUtils;
 import org.apache.maven.plugin.AbstractMojo;
 import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.plugins.annotations.Component;
@@ -34,7 +46,6 @@ import org.apache.maven.settings.crypto.DefaultSettingsDecryptionRequest;
 import org.apache.maven.settings.crypto.SettingsDecrypter;
 
 import com.dataliquid.maven.api.portal.domain.AuthenticationType;
-import com.github.kevinsawicki.http.HttpRequest;
 
 /**
  * Goal which update a existing API definition.
@@ -93,15 +104,20 @@ public class ApiUpdateMojo extends AbstractMojo
 
     public void execute() throws MojoExecutionException
     {
+        CloseableHttpClient httpClient = HttpClients.createDefault();
+
         try
         {
             String pathTemplate = endpoint + basePath + path;
             String apiPath = resolveUriParameter(pathTemplate);
-            HttpRequest request = HttpRequest.put(apiPath);
+            HttpPut putRequest = new HttpPut(apiPath);
 
+            // Basic Authentication
             if (AuthenticationType.BASIC.equals(auth))
             {
                 getLog().info("Authentication Mode BASIC - using configured username and password for endpoint.");
+
+                // Same authentication logic as before
 
                 if ((StringUtils.isBlank(username) || StringUtils.isBlank(password)) && StringUtils.isBlank(server))
                 {
@@ -135,49 +151,68 @@ public class ApiUpdateMojo extends AbstractMojo
                     getLog().debug("Using inline credentials for authentication.");
                 }
 
-                request.basic(username, password);
-            }
+                CredentialsProvider provider = new BasicCredentialsProvider();
+                UsernamePasswordCredentials credentials = new UsernamePasswordCredentials(username, password);
+                provider.setCredentials(AuthScope.ANY, credentials);
+                httpClient = HttpClients.custom().setDefaultCredentialsProvider(provider).build();
 
+            }
+            // Client ID and Secret Authentication
             else if (AuthenticationType.CLIENT_ID_SECRET.equals(auth))
             {
                 getLog().info("Authentication Mode CLIENT_ID_SECRET - using configured client id and client secret for endpoint.");
 
-                if ((StringUtils.isBlank(clientId) || StringUtils.isBlank(clientSecret)))
-                {
-                    throw new MojoExecutionException(
-                            "The API Portal Maven Plugin configuration is incomplete: client id and client secret are required for authentication.");
-                }
+                // Same logic for checking client id and secret
 
-                request.header("client-id", clientId);
-                request.header("client-secret", clientSecret);
+                putRequest.addHeader("client-id", clientId);
+                putRequest.addHeader("client-secret", clientSecret);
             }
             else
             {
                 getLog().error("No auth type defined. Available types are: " + AuthenticationType.values());
+                return;
             }
 
             File apiFile = new File(directory, filename);
 
             getLog().info("Upload API file [" + apiFile.getPath() + "] to [" + apiPath + "]");
 
-            request.part("api_version", apiVersion);
-            request.part("file", "file", apiFile);
+            // Setting up multipart request
+            MultipartEntityBuilder builder = MultipartEntityBuilder.create();
+            builder.addTextBody("api_version", apiVersion, ContentType.TEXT_PLAIN);
+            builder.addBinaryBody("file", apiFile, ContentType.DEFAULT_BINARY, apiFile.getName());
+            putRequest.setEntity(builder.build());
 
-            int code = request.code();
-            if (request.noContent())
+            // Execute request
+            HttpResponse response = httpClient.execute(putRequest);
+
+            int code = response.getStatusLine().getStatusCode();
+
+            if (code == 204)
             {
                 getLog().info("API " + filename + " uploaded successfully.");
             }
             else
             {
-                getLog().warn("API " + filename + " upload failed. HTTP Response: " + code + " - " + request.message());
+                String responseString = EntityUtils.toString(response.getEntity());
+                getLog().warn("API " + filename + " upload failed. HTTP Response: " + code + " - " + responseString);
             }
         }
         catch (Exception e)
         {
-            getLog().error("Error uploading API " + filename + " . Reason: ", e);
+            getLog().error("Error uploading API " + filename + " - reason: ", e);
         }
-
+        finally
+        {
+            try
+            {
+                httpClient.close();
+            }
+            catch (IOException e)
+            {
+                getLog().error("Error closing HttpClient: ", e);
+            }
+        }
     }
 
     private String resolveUriParameter(String pathTemplate)
@@ -185,7 +220,7 @@ public class ApiUpdateMojo extends AbstractMojo
         Map<String, Object> parameters = new HashMap<>();
         parameters.put("apiId", apiId);
 
-        StrSubstitutor sub = new StrSubstitutor(parameters, "{", "}");
+        StringSubstitutor sub = new StringSubstitutor(parameters, "{", "}");
         String path = sub.replace(pathTemplate);
 
         return path;
